@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: Statistics_work_checker
+
+server:
+  port: 8080
