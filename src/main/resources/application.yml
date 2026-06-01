@@ -1,6 +1,24 @@
 spring:
   application:
     name: Statistics_work_checker
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/statistics_work_checker}
+    username: ${DB_USERNAME:User}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:init.sql
+      continue-on-error: false
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
 
 server:
   port: 8080
