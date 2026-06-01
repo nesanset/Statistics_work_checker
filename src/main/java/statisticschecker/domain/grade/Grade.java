@@ -1,11 +1,13 @@
 package statisticschecker.domain.grade;
 
+import statisticschecker.domain.grade.validation.*;
 import java.math.BigDecimal;
 
 public class Grade {
     private final Long studentId;
     private final Long assignmentId;
     private final BigDecimal maxScore;
+    private final GradeValidationChain validationChain;
     private BigDecimal score;
     private CommentTemplate commentTemplate;
 
@@ -22,6 +24,7 @@ public class Grade {
         this.studentId = studentId;
         this.assignmentId = assignmentId;
         this.maxScore = maxScore.stripTrailingZeros();
+        this.validationChain = GradeValidationChain.createDefault();
         this.commentTemplate = CommentTemplate.NO_COMMENT;
     }
 
@@ -52,7 +55,11 @@ public class Grade {
     public void updateScore(BigDecimal newScore, CommentTemplate newCommentTemplate) {
         validateScore(newScore);
         score = newScore.stripTrailingZeros();
-        commentTemplate = newCommentTemplate == null ? CommentTemplate.NO_COMMENT : newCommentTemplate;
+        if (newCommentTemplate == null) {
+            commentTemplate = CommentTemplate.NO_COMMENT;
+        } else {
+            commentTemplate = newCommentTemplate;
+        }
     }
 
     public void deleteScore() {
@@ -66,14 +73,6 @@ public class Grade {
     }
 
     private void validateScore(BigDecimal checkedScore) {
-        if (checkedScore == null) {
-            throw new IllegalArgumentException("Оценка не должна быть пустой");
-        }
-        if (checkedScore.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Оценка не должна быть отрицательной");
-        }
-        if (checkedScore.compareTo(maxScore) > 0) {
-            throw new IllegalArgumentException("Оценка не должна превышать максимальный балл");
-        }
+        validationChain.validate(new GradeValidationContext(checkedScore, maxScore));
     }
 }
