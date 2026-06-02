@@ -1,25 +1,29 @@
 package statisticschecker.web.controller;
 
 import jakarta.validation.Valid;
-import java.util.*;
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import statisticschecker.service.grade.*t;
+import statisticschecker.service.grade.*;
+import statisticschecker.web.dto.grade.*;
+import statisticschecker.web.mapper.GradeResponseMapper;
 
 @RestController
 @RequestMapping("/api/students/{studentId}")
 public class GradeController {
     private final GradeService gradeService;
+    private final GradeResponseMapper gradeResponseMapper;
 
-    public GradeController(GradeService gradeService) {
+    public GradeController(GradeService gradeService, GradeResponseMapper gradeResponseMapper) {
         this.gradeService = gradeService;
+        this.gradeResponseMapper = gradeResponseMapper;
     }
 
     @PutMapping("/assignments/{assignmentId}/grade")
     public GradeResponse updateGrade(@PathVariable Integer studentId, @PathVariable Integer assignmentId, @Valid @RequestBody UpdateGradeRequest request) {
         UpdateGradeCommand command = new UpdateGradeCommand(studentId, assignmentId, request.score(), request.commentTemplate());
         GradeResult result = gradeService.updateGrade(command);
-        return GradeResponse.fromResult(result);
+        return gradeResponseMapper.toResponse(result);
     }
 
     @DeleteMapping("/assignments/{assignmentId}/grade")
@@ -31,10 +35,6 @@ public class GradeController {
     @PostMapping("/missing-work")
     public List<GradeResponse> markMissingWork(@PathVariable Integer studentId) {
         List<GradeResult> results = gradeService.markMissingWork(studentId);
-        List<GradeResponse> responses = new ArrayList<>();
-        for (GradeResult result : results) {
-            responses.add(GradeResponse.fromResult(result));
-        }
-        return responses;
+        return gradeResponseMapper.toResponseList(results);
     }
 }
