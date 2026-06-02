@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS assignments (
     id SERIAL PRIMARY KEY,
     variant_id INTEGER NOT NULL,
     number INTEGER NOT NULL,
-    text TEXT,
+    text TEXT NOT NULL,
     max_score NUMERIC(5,2) NOT NULL CHECK (max_score > 0),
     CONSTRAINT uq_assignments_number UNIQUE (variant_id, number),
     CONSTRAINT fk_assignments_variant FOREIGN KEY (variant_id) REFERENCES variants (id) ON DELETE CASCADE

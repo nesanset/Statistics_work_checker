@@ -1,7 +1,7 @@
 package statisticschecker.persistence.entity;
 
 import jakarta.persistence.*;
-import statisticschecker.domain.result.CheckStatus;
+import statisticschecker.domain.status.CheckStatus;
 
 @Entity
 @Table(name = "students")

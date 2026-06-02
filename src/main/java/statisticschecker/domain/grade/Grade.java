@@ -1,7 +1,8 @@
 package statisticschecker.domain.grade;
 
-import statisticschecker.domain.grade.validation.*;
 import java.math.BigDecimal;
+import statisticschecker.domain.grade.validation.GradeValidationChain;
+import statisticschecker.domain.grade.validation.GradeValidationContext;
 
 public class Grade {
     private final Long studentId;

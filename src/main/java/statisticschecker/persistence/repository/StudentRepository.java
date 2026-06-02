@@ -2,7 +2,7 @@ package statisticschecker.persistence.repository;
 
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
-import statisticschecker.domain.result.CheckStatus;
+import statisticschecker.domain.status.CheckStatus;
 import statisticschecker.persistence.entity.StudentEntity;
 
 public interface StudentRepository extends JpaRepository<StudentEntity, Integer> {

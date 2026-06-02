@@ -1,9 +1,12 @@
 package statisticschecker.web.controller;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
-import statisticschecker.service.checking.AssignmentResult;
-import statisticschecker.service.checking.CheckingViewService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import statisticschecker.domain.assignment.CheckedAssignment;
+import statisticschecker.service.CheckingViewService;
 import statisticschecker.web.dto.assignment.AssignmentResponse;
 import statisticschecker.web.mapper.AssignmentResponseMapper;
 
@@ -20,7 +23,7 @@ public class AssignmentController {
 
     @GetMapping
     public List<AssignmentResponse> findAssignments(@PathVariable Integer studentId) {
-        List<AssignmentResult> results = checkingViewService.findAssignmentsByStudent(studentId);
-        return assignmentResponseMapper.toResponseList(results);
+        List<CheckedAssignment> checkedAssignments = checkingViewService.findAssignmentsByStudent(studentId);
+        return assignmentResponseMapper.toResponseList(checkedAssignments);
     }
 }

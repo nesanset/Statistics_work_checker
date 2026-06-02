@@ -1,9 +1,12 @@
 package statisticschecker.web.controller;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
-import statisticschecker.service.checking.CheckingViewService;
-import statisticschecker.service.checking.GroupResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import statisticschecker.domain.group.StudentGroup;
+import statisticschecker.service.CheckingViewService;
 import statisticschecker.web.dto.group.GroupResponse;
 import statisticschecker.web.mapper.GroupResponseMapper;
 
@@ -20,7 +23,7 @@ public class StudentGroupController {
 
     @GetMapping
     public List<GroupResponse> findGroups(@PathVariable Integer controlWorkId) {
-        List<GroupResult> results = checkingViewService.findGroupsByControlWork(controlWorkId);
-        return groupResponseMapper.toResponseList(results);
+        List<StudentGroup> groups = checkingViewService.findGroupsByControlWork(controlWorkId);
+        return groupResponseMapper.toResponseList(groups);
     }
 }

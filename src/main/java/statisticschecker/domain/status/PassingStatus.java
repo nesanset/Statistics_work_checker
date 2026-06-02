@@ -1,4 +1,4 @@
-package statisticschecker.domain.result;
+package statisticschecker.domain.status;
 
 import java.math.BigDecimal;
 

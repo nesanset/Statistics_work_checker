@@ -1,14 +1,21 @@
-package statisticschecker.service.grade;
+package statisticschecker.service;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import statisticschecker.domain.grade.CommentTemplate;
 import statisticschecker.domain.grade.Grade;
-import statisticschecker.domain.result.CheckStatus;
-import statisticschecker.persistence.entity.*;
-import statisticschecker.persistence.repository.*;
+import statisticschecker.domain.grade.GradeChange;
+import statisticschecker.domain.status.CheckStatus;
+import statisticschecker.persistence.entity.AssignmentEntity;
+import statisticschecker.persistence.entity.GradeEntity;
+import statisticschecker.persistence.entity.StudentEntity;
+import statisticschecker.persistence.repository.AssignmentRepository;
+import statisticschecker.persistence.repository.GradeRepository;
+import statisticschecker.persistence.repository.StudentRepository;
 
 @Service
 public class GradeService {
@@ -23,21 +30,20 @@ public class GradeService {
     }
 
     @Transactional
-    public GradeResult updateGrade(UpdateGradeCommand command) {
-        validateCommand(command);
-        StudentEntity student = findStudent(command.studentId());
-        AssignmentEntity assignment = findAssignment(command.assignmentId());
+    public GradeChange updateGrade(Integer studentId, Integer assignmentId, BigDecimal score, CommentTemplate commentTemplate) {
+        StudentEntity student = findStudent(studentId);
+        AssignmentEntity assignment = findAssignment(assignmentId);
         validateAssignmentBelongsToStudentVariant(student, assignment);
 
         Grade checkedGrade = new Grade(student.getId().longValue(), assignment.getId().longValue(), assignment.getMaxScore());
-        checkedGrade.updateScore(command.score(), command.commentTemplate());
+        checkedGrade.updateScore(score, commentTemplate);
 
         GradeEntity gradeEntity = findOrCreateGrade(student, assignment);
         gradeEntity.updateScore(checkedGrade.getScore(), checkedGrade.getCommentTemplate());
         GradeEntity savedGrade = gradeRepository.save(gradeEntity);
 
         updateStudentStatusAfterGradeChange(student);
-        return buildResult(student, assignment, savedGrade);
+        return buildGradeChange(student, assignment, savedGrade);
     }
 
     @Transactional
@@ -51,7 +57,7 @@ public class GradeService {
     }
 
     @Transactional
-    public List<GradeResult> markMissingWork(Integer studentId) {
+    public List<GradeChange> markMissingWork(Integer studentId) {
         StudentEntity student = findStudent(studentId);
         List<AssignmentEntity> assignments = assignmentRepository.findByVariantIdOrderByNumberAsc(student.getVariant().getId());
         if (assignments.isEmpty()) {
@@ -59,31 +65,19 @@ public class GradeService {
         }
 
         student.updateCheckStatus(CheckStatus.MISSING_WORK);
-        List<GradeResult> results = new ArrayList<>();
+        List<GradeChange> results = new ArrayList<>();
         for (AssignmentEntity assignment : assignments) {
             Grade checkedGrade = new Grade(student.getId().longValue(), assignment.getId().longValue(), assignment.getMaxScore());
             checkedGrade.markMissingWork();
 
             GradeEntity gradeEntity = findOrCreateGrade(student, assignment);
-            gradeEntity.updateScore(BigDecimal.ZERO, CommentTemplate.TASK_NOT_COMPLETED);
+            gradeEntity.updateScore(checkedGrade.getScore(), checkedGrade.getCommentTemplate());
             GradeEntity savedGrade = gradeRepository.save(gradeEntity);
-            results.add(buildResult(student, assignment, savedGrade));
+            results.add(buildGradeChange(student, assignment, savedGrade));
         }
 
         studentRepository.save(student);
         return results;
-    }
-
-    private void validateCommand(UpdateGradeCommand command) {
-        if (command == null) {
-            throw new IllegalArgumentException("Данные оценки не должны быть пустыми");
-        }
-        if (command.studentId() == null) {
-            throw new IllegalArgumentException("Идентификатор студента не должен быть пустым");
-        }
-        if (command.assignmentId() == null) {
-            throw new IllegalArgumentException("Идентификатор задания не должен быть пустым");
-        }
     }
 
     private StudentEntity findStudent(Integer studentId) {
@@ -154,7 +148,7 @@ public class GradeService {
         return false;
     }
 
-    private GradeResult buildResult(StudentEntity student, AssignmentEntity assignment, GradeEntity grade) {
-        return new GradeResult(student.getId(), assignment.getId(), grade.getScore(), grade.getCommentTemplate(), student.getCheckStatus());
+    private GradeChange buildGradeChange(StudentEntity student, AssignmentEntity assignment, GradeEntity grade) {
+        return new GradeChange(student.getId(), assignment.getId(), grade.getScore(), grade.getCommentTemplate(), student.getCheckStatus());
     }
 }

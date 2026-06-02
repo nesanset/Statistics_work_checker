@@ -3,20 +3,20 @@ package statisticschecker.web.mapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Component;
-import statisticschecker.service.checking.StudentResult;
+import statisticschecker.domain.student.CheckedStudent;
 import statisticschecker.web.dto.student.StudentResponse;
 
 @Component
 public class StudentResponseMapper {
 
-    public StudentResponse toResponse(StudentResult result) {
-        return new StudentResponse(result.id(), result.groupId(), result.fullName(), result.variantCode(), result.checkStatus(), result.totalScore());
+    public StudentResponse toResponse(CheckedStudent checkedStudent) {
+        return new StudentResponse(checkedStudent.id().intValue(), checkedStudent.groupId().intValue(), checkedStudent.fullName(), checkedStudent.variantCode(), checkedStudent.checkStatus(), checkedStudent.totalScore());
     }
 
-    public List<StudentResponse> toResponseList(List<StudentResult> results) {
+    public List<StudentResponse> toResponseList(List<CheckedStudent> checkedStudents) {
         List<StudentResponse> responses = new ArrayList<>();
-        for (StudentResult result : results) {
-            responses.add(toResponse(result));
+        for (CheckedStudent checkedStudent : checkedStudents) {
+            responses.add(toResponse(checkedStudent));
         }
         return responses;
     }
