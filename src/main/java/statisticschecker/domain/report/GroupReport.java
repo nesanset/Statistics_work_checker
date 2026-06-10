@@ -4,27 +4,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import statisticschecker.domain.group.StudentGroup;
 import statisticschecker.domain.student.StudentWork;
+import statisticschecker.domain.validation.DomainValidation;
 
-public record GroupReport(Long controlWorkId, String controlWorkTitle, StudentGroup group, BigDecimal passingScore, List<StudentWork> studentWorks) {
+public record GroupReport(Integer controlWorkId, String controlWorkTitle, StudentGroup group, BigDecimal passingScore, List<StudentWork> studentWorks) {
 
     public GroupReport {
-        if (controlWorkId == null) {
-            throw new IllegalArgumentException("Идентификатор контрольной работы не должен быть пустым");
-        }
-        if (controlWorkTitle == null || controlWorkTitle.isBlank()) {
-            throw new IllegalArgumentException("Название контрольной работы не должно быть пустым");
-        }
-        if (group == null) {
-            throw new IllegalArgumentException("Группа не должна быть пустой");
-        }
-        if (passingScore == null || passingScore.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Проходной балл не должен быть отрицательным");
-        }
-        if (studentWorks == null) {
-            studentWorks = List.of();
-        }
-        controlWorkTitle = controlWorkTitle.trim();
-        passingScore = passingScore.stripTrailingZeros();
-        studentWorks = List.copyOf(studentWorks);
+        controlWorkId = DomainValidation.requireNotNull(controlWorkId, "Идентификатор контрольной работы не должен быть пустым");
+        controlWorkTitle = DomainValidation.requireText(controlWorkTitle, "Название контрольной работы не должно быть пустым");
+        group = DomainValidation.requireNotNull(group, "Группа не должна быть пустой");
+        passingScore = DomainValidation.requireNonNegative(passingScore, "Проходной балл не должен быть отрицательным");
+        studentWorks = DomainValidation.copyNullableList(studentWorks);
     }
 }

@@ -1,27 +1,15 @@
 package statisticschecker.domain.variant;
 
-import statisticschecker.domain.assignment.Assignment;
-import java.math.BigDecimal;
 import java.util.List;
+import statisticschecker.domain.assignment.Assignment;
+import statisticschecker.domain.validation.DomainValidation;
 
-public record Variant(String code, List<Assignment> assignments) {
+public record Variant(String code, String sourceFileName, List<Assignment> assignments) {
 
     public Variant {
-        if (code == null || code.isBlank()) {
-            throw new IllegalArgumentException("Код варианта не должен быть пустым");
-        }
-        if (assignments == null) {
-            throw new IllegalArgumentException("Список заданий не должен быть пустым");
-        }
-        code = code.trim();
-        assignments = List.copyOf(assignments);
+        code = DomainValidation.requireText(code, "Код варианта не должен быть пустым");
+        sourceFileName = DomainValidation.trimNullableText(sourceFileName);
+        assignments = DomainValidation.requireNotEmptyList(assignments, "Список заданий не должен быть пустым");
     }
 
-    public BigDecimal calculateMaxTotalScore() {
-        BigDecimal totalScore = BigDecimal.ZERO;
-        for (Assignment assignment : assignments) {
-            totalScore = totalScore.add(assignment.maxScore());
-        }
-        return totalScore.stripTrailingZeros();
-    }
 }

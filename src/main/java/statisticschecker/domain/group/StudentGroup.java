@@ -1,11 +1,10 @@
 package statisticschecker.domain.group;
 
-public record StudentGroup(Long id, String name) {
+import statisticschecker.domain.validation.DomainValidation;
+
+public record StudentGroup(Integer id, String name) {
 
     public StudentGroup {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Название группы не должно быть пустым");
-        }
-        name = name.trim();
+        name = DomainValidation.requireText(name, "Название группы не должно быть пустым");
     }
 }
