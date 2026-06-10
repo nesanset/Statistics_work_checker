@@ -1,6 +1,10 @@
-package statisticschecker.persistence.entity;
+package statisticschecker.persistence.variant;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import statisticschecker.persistence.assignment.AssignmentEntity;
+import statisticschecker.persistence.controlwork.ControlWorkEntity;
 
 @Entity
 @Table(name = "variants", uniqueConstraints = @UniqueConstraint(name = "uq_variants_code", columnNames = {"control_work_id", "code"}))
@@ -19,11 +23,13 @@ public class VariantEntity {
     @Column(name = "source_file_name", length = 180)
     private String sourceFileName;
 
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AssignmentEntity> assignments = new ArrayList<>();
+
     protected VariantEntity() {
     }
 
-    public VariantEntity(ControlWorkEntity controlWork, String code, String sourceFileName) {
-        this.controlWork = controlWork;
+    public VariantEntity(String code, String sourceFileName) {
         this.code = code;
         this.sourceFileName = sourceFileName;
     }
@@ -32,15 +38,20 @@ public class VariantEntity {
         return id;
     }
 
-    public ControlWorkEntity getControlWork() {
-        return controlWork;
-    }
-
     public String getCode() {
         return code;
     }
 
-    public String getSourceFileName() {
-        return sourceFileName;
+    public List<AssignmentEntity> getAssignments() {
+        return assignments;
+    }
+
+    public void addAssignment(AssignmentEntity assignment) {
+        assignment.assignVariant(this);
+        assignments.add(assignment);
+    }
+
+    public void assignControlWork(ControlWorkEntity controlWork) {
+        this.controlWork = controlWork;
     }
 }

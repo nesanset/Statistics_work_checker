@@ -1,4 +1,4 @@
-package statisticschecker.persistence.entity;
+package statisticschecker.persistence.user;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -13,11 +13,8 @@ public class AppUserEntity {
     @Column(nullable = false, unique = true, length = 60)
     private String username;
 
-    @Column(name = "password_hash", nullable = false, length = 120)
-    private String passwordHash;
-
-    @Column(nullable = false, length = 20)
-    private String role;
+    @Column(nullable = false, length = 80)
+    private String password;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -25,10 +22,9 @@ public class AppUserEntity {
     protected AppUserEntity() {
     }
 
-    public AppUserEntity(String username, String passwordHash, String role) {
+    public AppUserEntity(String username, String password) {
         this.username = username;
-        this.passwordHash = passwordHash;
-        this.role = role;
+        this.password = password;
     }
 
     public Integer getId() {
@@ -39,22 +35,11 @@ public class AppUserEntity {
         return username;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public String getRole() {
-        return role;
+    public String getPassword() {
+        return password;
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    @PrePersist
-    private void fillCreatedAt() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
     }
 }

@@ -1,9 +1,11 @@
-package statisticschecker.persistence.entity;
+package statisticschecker.persistence.grade;
 
 import jakarta.persistence.*;
 import statisticschecker.domain.grade.CommentTemplate;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import statisticschecker.persistence.assignment.AssignmentEntity;
+import statisticschecker.persistence.student.StudentEntity;
 
 @Entity
 @Table(name = "grades", uniqueConstraints = @UniqueConstraint(name = "uq_grades_student_assignment", columnNames = {"student_id", "assignment_id"}))
@@ -60,19 +62,9 @@ public class GradeEntity {
         return commentTemplate;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
     public void updateScore(BigDecimal score, CommentTemplate commentTemplate) {
         this.score = score;
         this.commentTemplate = commentTemplate;
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PrePersist
-    @PreUpdate
-    private void refreshUpdatedAt() {
         updatedAt = LocalDateTime.now();
     }
 }

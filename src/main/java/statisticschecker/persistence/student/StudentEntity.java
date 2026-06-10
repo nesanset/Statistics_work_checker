@@ -1,10 +1,12 @@
-package statisticschecker.persistence.entity;
+package statisticschecker.persistence.student;
 
 import jakarta.persistence.*;
 import statisticschecker.domain.status.CheckStatus;
+import statisticschecker.persistence.group.StudentGroupEntity;
+import statisticschecker.persistence.variant.VariantEntity;
 
 @Entity
-@Table(name = "students")
+@Table(name = "students", uniqueConstraints = @UniqueConstraint(name = "uq_students_group_full_name", columnNames = {"group_id", "full_name"}))
 public class StudentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +30,7 @@ public class StudentEntity {
     protected StudentEntity() {
     }
 
-    public StudentEntity(StudentGroupEntity studentGroup, VariantEntity variant, String fullName) {
-        this.studentGroup = studentGroup;
+    public StudentEntity(VariantEntity variant, String fullName) {
         this.variant = variant;
         this.fullName = fullName;
     }
@@ -56,5 +57,9 @@ public class StudentEntity {
 
     public void updateCheckStatus(CheckStatus checkStatus) {
         this.checkStatus = checkStatus;
+    }
+
+    public void assignGroup(StudentGroupEntity studentGroup) {
+        this.studentGroup = studentGroup;
     }
 }
