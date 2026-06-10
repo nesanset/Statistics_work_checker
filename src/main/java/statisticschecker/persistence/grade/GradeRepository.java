@@ -1,9 +1,8 @@
-package statisticschecker.persistence.repository;
+package statisticschecker.persistence.grade;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import statisticschecker.persistence.entity.GradeEntity;
 
 public interface GradeRepository extends JpaRepository<GradeEntity, Integer> {
     List<GradeEntity> findByStudentId(Integer studentId);
