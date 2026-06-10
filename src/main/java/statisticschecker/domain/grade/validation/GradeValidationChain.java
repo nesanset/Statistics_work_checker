@@ -13,10 +13,14 @@ public class GradeValidationChain {
     public static GradeValidationChain createDefault() {
         AbstractGradeValidationHandler scoreRequiredValidator = new ScoreRequiredValidator();
         AbstractGradeValidationHandler nonNegativeScoreValidator = new NonNegativeScoreValidator();
-        GradeValidationHandler maxScoreValidator = new MaxScoreValidator();
+        AbstractGradeValidationHandler maxScoreValidator = new MaxScoreValidator();
+        AbstractGradeValidationHandler scoreStepValidator = new ScoreStepValidator();
+        GradeValidationHandler zeroScoreCommentValidator = new ZeroScoreCommentValidator();
 
         scoreRequiredValidator.setNextHandler(nonNegativeScoreValidator);
         nonNegativeScoreValidator.setNextHandler(maxScoreValidator);
+        maxScoreValidator.setNextHandler(scoreStepValidator);
+        scoreStepValidator.setNextHandler(zeroScoreCommentValidator);
 
         return new GradeValidationChain(scoreRequiredValidator);
     }
