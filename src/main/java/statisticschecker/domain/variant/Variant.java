@@ -11,5 +11,4 @@ public record Variant(String code, String sourceFileName, List<Assignment> assig
         sourceFileName = DomainValidation.trimNullableText(sourceFileName);
         assignments = DomainValidation.requireNotEmptyList(assignments, "Список заданий не должен быть пустым");
     }
-
 }

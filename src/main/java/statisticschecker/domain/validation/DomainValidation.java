@@ -8,13 +8,6 @@ public final class DomainValidation {
     private DomainValidation() {
     }
 
-    public static <T> T requireNotNull(T value, String message) {
-        if (value == null) {
-            throw new IllegalArgumentException(message);
-        }
-        return value;
-    }
-
     public static String requireText(String value, String message) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(message);
@@ -47,23 +40,6 @@ public final class DomainValidation {
         return value.stripTrailingZeros();
     }
 
-    public static BigDecimal requireNonNegative(BigDecimal value, String message) {
-        if (value == null) {
-            throw new IllegalArgumentException(message);
-        }
-        return normalizeNonNegative(value, message);
-    }
-
-    public static BigDecimal normalizeNullableNonNegative(BigDecimal value, String message) {
-        if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException(message);
-        }
-        if (value == null) {
-            return null;
-        }
-        return value.stripTrailingZeros();
-    }
-
     public static <T> List<T> requireNotEmptyList(List<T> values, String message) {
         if (values == null || values.isEmpty()) {
             throw new IllegalArgumentException(message);
@@ -76,12 +52,5 @@ public final class DomainValidation {
             return List.of();
         }
         return List.copyOf(values);
-    }
-
-    private static BigDecimal normalizeNonNegative(BigDecimal value, String message) {
-        if (value.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException(message);
-        }
-        return value.stripTrailingZeros();
     }
 }
