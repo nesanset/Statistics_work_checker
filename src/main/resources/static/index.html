@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Statistics Work Checker</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-mark">SW</div>
+            <div>
+                <div class="brand-title">Statistics Work Checker</div>
+                <div class="brand-subtitle">Проверка контрольных работ по статистике</div>
+            </div>
+        </div>
+        <div class="user-area">
+            <span id="currentUser" class="user-chip hidden"></span>
+            <button id="logoutButton" class="icon-button hidden" type="button" title="Выйти">Выйти</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="authView" class="auth-layout">
+            <div class="auth-panel">
+                <div class="section-heading">
+                    <p class="eyebrow">Вход преподавателя</p>
+                    <h1>Панель проверки работ</h1>
+                </div>
+                <div class="tabs">
+                    <button id="loginTab" class="tab active" type="button">Вход</button>
+                    <button id="registerTab" class="tab" type="button">Регистрация</button>
+                </div>
+                <form id="authForm" class="form-grid">
+                    <label>
+                        <span>Логин</span>
+                        <input id="authUsername" name="username" type="text" autocomplete="username" placeholder="teacher">
+                    </label>
+                    <label>
+                        <span>Пароль</span>
+                        <input id="authPassword" name="password" type="password" autocomplete="current-password" placeholder="Введите пароль">
+                    </label>
+                    <button id="authSubmit" class="primary-button" type="submit">Войти</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="workspaceView" class="workspace hidden">
+            <aside class="sidebar">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Контрольные работы</h2>
+                        <button id="refreshWorksButton" class="ghost-button" type="button">Обновить</button>
+                    </div>
+                    <div id="controlWorkList" class="work-list"></div>
+                </section>
+
+                <section class="panel">
+                    <h2>Новая работа</h2>
+                    <form id="createWorkForm" class="form-grid compact">
+                        <label>
+                            <span>Название</span>
+                            <input id="workTitle" type="text" placeholder="Контрольная работа 1">
+                        </label>
+                        <label>
+                            <span>Проходной балл</span>
+                            <input id="passingScore" type="number" min="0" step="0.5" placeholder="6">
+                        </label>
+                        <button class="primary-button" type="submit">Создать</button>
+                    </form>
+                </section>
+
+                <section class="panel">
+                    <h2>Импорт XLSX</h2>
+                    <form id="importForm" class="form-grid compact">
+                        <label>
+                            <span>Файл студентов</span>
+                            <input id="studentListPath" type="text" placeholder="/Users/User/.../students.xlsx">
+                        </label>
+                        <label>
+                            <span>Папка вариантов</span>
+                            <input id="variantsPath" type="text" placeholder="/Users/User/.../variants">
+                        </label>
+                        <button class="secondary-button" type="submit">Импортировать</button>
+                    </form>
+                </section>
+            </aside>
+
+            <section class="content">
+                <section class="summary-band">
+                    <div>
+                        <p class="eyebrow">Выбранная работа</p>
+                        <h1 id="selectedWorkTitle">Выберите контрольную работу</h1>
+                    </div>
+                    <form id="passingScoreForm" class="inline-form">
+                        <label>
+                            <span>Проходной балл</span>
+                            <input id="newPassingScore" type="number" min="0" step="0.5">
+                        </label>
+                        <button class="ghost-button" type="submit">Сохранить</button>
+                    </form>
+                </section>
+
+                <div class="board">
+                    <section class="panel groups-panel">
+                        <div class="panel-header">
+                            <h2>Группы</h2>
+                            <span id="groupsCount" class="counter">0</span>
+                        </div>
+                        <div id="groupList" class="list"></div>
+                    </section>
+
+                    <section class="panel students-panel">
+                        <div class="panel-header">
+                            <h2>Студенты</h2>
+                            <button id="reportButton" class="ghost-button" type="button">Отчет</button>
+                        </div>
+                        <div id="studentList" class="list"></div>
+                    </section>
+
+                    <section class="panel assignments-panel">
+                        <div class="panel-header">
+                            <div>
+                                <h2 id="studentTitle">Задания</h2>
+                                <p id="studentMeta" class="muted">Студент не выбран</p>
+                            </div>
+                            <button id="missingWorkButton" class="danger-button" type="button">Нет работы</button>
+                        </div>
+                        <div id="assignmentList" class="assignment-list empty-state">Выберите студента, чтобы открыть задания.</div>
+                    </section>
+                </div>
+
+                <section id="reportPanel" class="panel report-panel hidden">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Отчет по группе</h2>
+                            <p id="reportMeta" class="muted"></p>
+                        </div>
+                        <button id="closeReportButton" class="ghost-button" type="button">Закрыть</button>
+                    </div>
+                    <div id="reportTable" class="report-table"></div>
+                </section>
+            </section>
+        </section>
+    </main>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/app.js?v=3"></script>
+</body>
+</html>
