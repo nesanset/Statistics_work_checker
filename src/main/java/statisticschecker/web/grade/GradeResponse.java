@@ -1,4 +1,4 @@
-package statisticschecker.web.dto.grade;
+package statisticschecker.web.grade;
 
 import java.math.BigDecimal;
 import statisticschecker.domain.grade.CommentTemplate;

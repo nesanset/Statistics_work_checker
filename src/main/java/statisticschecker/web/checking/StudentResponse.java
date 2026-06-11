@@ -1,4 +1,4 @@
-package statisticschecker.web.dto.student;
+package statisticschecker.web.checking;
 
 import java.math.BigDecimal;
 import statisticschecker.domain.status.CheckStatus;

@@ -1,4 +1,4 @@
-package statisticschecker.web.dto.report;
+package statisticschecker.web.report;
 
 import java.math.BigDecimal;
 import java.util.List;
