@@ -76,7 +76,3 @@ CREATE INDEX IF NOT EXISTS idx_students_variant ON students (variant_id);
 CREATE INDEX IF NOT EXISTS idx_assignments_variant ON assignments (variant_id);
 CREATE INDEX IF NOT EXISTS idx_grades_student ON grades (student_id);
 CREATE INDEX IF NOT EXISTS idx_grades_assignment ON grades (assignment_id);
-
-INSERT INTO app_users (username, password)
-VALUES ('teacher', 'cde383eee8ee7a4400adf7a15f716f179a2eb97646b37e089eb8d6d04e663416')
-ON CONFLICT (username) DO NOTHING;
