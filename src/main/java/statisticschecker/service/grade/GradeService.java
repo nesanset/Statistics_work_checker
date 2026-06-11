@@ -1,32 +1,28 @@
-package statisticschecker.service;
+package statisticschecker.service.grade;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import statisticschecker.domain.grade.CommentTemplate;
-import statisticschecker.domain.grade.Grade;
-import statisticschecker.domain.grade.GradeChange;
+import statisticschecker.domain.grade.*;
 import statisticschecker.domain.status.CheckStatus;
-import statisticschecker.persistence.entity.AssignmentEntity;
-import statisticschecker.persistence.entity.GradeEntity;
-import statisticschecker.persistence.entity.StudentEntity;
-import statisticschecker.persistence.repository.AssignmentRepository;
-import statisticschecker.persistence.repository.GradeRepository;
-import statisticschecker.persistence.repository.StudentRepository;
+import statisticschecker.persistence.assignment.*;
+import statisticschecker.persistence.grade.*;
+import statisticschecker.persistence.student.*;
+import statisticschecker.service.common.DomainMapper;
 
 @Service
 public class GradeService {
     private final StudentRepository studentRepository;
     private final AssignmentRepository assignmentRepository;
     private final GradeRepository gradeRepository;
+    private final DomainMapper domainMapper;
 
-    public GradeService(StudentRepository studentRepository, AssignmentRepository assignmentRepository, GradeRepository gradeRepository) {
+    public GradeService(StudentRepository studentRepository, AssignmentRepository assignmentRepository, GradeRepository gradeRepository, DomainMapper domainMapper) {
         this.studentRepository = studentRepository;
         this.assignmentRepository = assignmentRepository;
         this.gradeRepository = gradeRepository;
+        this.domainMapper = domainMapper;
     }
 
     @Transactional
@@ -35,7 +31,7 @@ public class GradeService {
         AssignmentEntity assignment = findAssignment(assignmentId);
         validateAssignmentBelongsToStudentVariant(student, assignment);
 
-        Grade checkedGrade = new Grade(student.getId().longValue(), assignment.getId().longValue(), assignment.getMaxScore());
+        Grade checkedGrade = new Grade(assignment.getMaxScore());
         checkedGrade.updateScore(score, commentTemplate);
 
         GradeEntity gradeEntity = findOrCreateGrade(student, assignment);
@@ -43,7 +39,7 @@ public class GradeService {
         GradeEntity savedGrade = gradeRepository.save(gradeEntity);
 
         updateStudentStatusAfterGradeChange(student);
-        return buildGradeChange(student, assignment, savedGrade);
+        return domainMapper.toGradeChange(student, assignment, savedGrade);
     }
 
     @Transactional
@@ -67,15 +63,14 @@ public class GradeService {
         student.updateCheckStatus(CheckStatus.MISSING_WORK);
         List<GradeChange> results = new ArrayList<>();
         for (AssignmentEntity assignment : assignments) {
-            Grade checkedGrade = new Grade(student.getId().longValue(), assignment.getId().longValue(), assignment.getMaxScore());
+            Grade checkedGrade = new Grade(assignment.getMaxScore());
             checkedGrade.markMissingWork();
 
             GradeEntity gradeEntity = findOrCreateGrade(student, assignment);
             gradeEntity.updateScore(checkedGrade.getScore(), checkedGrade.getCommentTemplate());
             GradeEntity savedGrade = gradeRepository.save(gradeEntity);
-            results.add(buildGradeChange(student, assignment, savedGrade));
+            results.add(domainMapper.toGradeChange(student, assignment, savedGrade));
         }
-
         studentRepository.save(student);
         return results;
     }
@@ -128,14 +123,7 @@ public class GradeService {
                 checkedCount++;
             }
         }
-
-        if (checkedCount == 0) {
-            student.updateCheckStatus(CheckStatus.NOT_CHECKED);
-        } else if (checkedCount == assignments.size()) {
-            student.updateCheckStatus(CheckStatus.CHECKED);
-        } else {
-            student.updateCheckStatus(CheckStatus.IN_PROGRESS);
-        }
+        student.updateCheckStatus(CheckStatus.calculate(checkedCount, assignments.size()));
         studentRepository.save(student);
     }
 
@@ -146,9 +134,5 @@ public class GradeService {
             }
         }
         return false;
-    }
-
-    private GradeChange buildGradeChange(StudentEntity student, AssignmentEntity assignment, GradeEntity grade) {
-        return new GradeChange(student.getId(), assignment.getId(), grade.getScore(), grade.getCommentTemplate(), student.getCheckStatus());
     }
 }

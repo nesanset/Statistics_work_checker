@@ -1,26 +1,34 @@
-package statisticschecker.service;
+package statisticschecker.service.checking;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import statisticschecker.domain.assignment.CheckedAssignment;
 import statisticschecker.domain.group.StudentGroup;
-import statisticschecker.domain.student.CheckedStudent;
-import statisticschecker.persistence.entity.*;
-import statisticschecker.persistence.repository.*;
+import statisticschecker.domain.report.GroupReport;
+import statisticschecker.domain.student.*;
+import statisticschecker.persistence.controlwork.ControlWorkEntity;
+import statisticschecker.persistence.student.*;
+import statisticschecker.persistence.group.*;
+import statisticschecker.persistence.controlwork.ControlWorkRepository;
+import statisticschecker.service.common.DomainMapper;
 
 @Service
-public class CheckingViewService {
+public class CheckingService {
     private final ControlWorkRepository controlWorkRepository;
     private final StudentGroupRepository studentGroupRepository;
     private final StudentRepository studentRepository;
-    private final StudentWorkAssembler studentWorkAssembler;
+    private final StudentWorkService studentWorkService;
+    private final DomainMapper domainMapper;
 
-    public CheckingViewService(ControlWorkRepository controlWorkRepository, StudentGroupRepository studentGroupRepository, StudentRepository studentRepository, StudentWorkAssembler studentWorkAssembler) {
+    public CheckingService(ControlWorkRepository controlWorkRepository, StudentGroupRepository studentGroupRepository, StudentRepository studentRepository, StudentWorkService studentWorkService, DomainMapper domainMapper) {
         this.controlWorkRepository = controlWorkRepository;
         this.studentGroupRepository = studentGroupRepository;
         this.studentRepository = studentRepository;
-        this.studentWorkAssembler = studentWorkAssembler;
+        this.studentWorkService = studentWorkService;
+        this.domainMapper = domainMapper;
     }
 
     @Transactional(readOnly = true)
@@ -30,7 +38,7 @@ public class CheckingViewService {
 
         List<StudentGroup> studentGroups = new ArrayList<>();
         for (StudentGroupEntity group : groups) {
-            studentGroups.add(new StudentGroup(group.getId().longValue(), group.getName()));
+            studentGroups.add(domainMapper.toStudentGroup(group));
         }
         return studentGroups;
     }
@@ -42,7 +50,7 @@ public class CheckingViewService {
 
         List<CheckedStudent> checkedStudents = new ArrayList<>();
         for (StudentEntity student : students) {
-            checkedStudents.add(studentWorkAssembler.buildCheckedStudent(student));
+            checkedStudents.add(studentWorkService.buildCheckedStudent(student));
         }
         return checkedStudents;
     }
@@ -50,13 +58,28 @@ public class CheckingViewService {
     @Transactional(readOnly = true)
     public CheckedStudent findStudent(Integer studentId) {
         StudentEntity student = findStudentEntity(studentId);
-        return studentWorkAssembler.buildCheckedStudent(student);
+        return studentWorkService.buildCheckedStudent(student);
     }
 
     @Transactional(readOnly = true)
     public List<CheckedAssignment> findAssignmentsByStudent(Integer studentId) {
         StudentEntity student = findStudentEntity(studentId);
-        return studentWorkAssembler.buildCheckedAssignments(student);
+        return studentWorkService.buildAssignments(student);
+    }
+
+    @Transactional(readOnly = true)
+    public GroupReport buildGroupReport(Integer controlWorkId, Integer groupId) {
+        ControlWorkEntity controlWork = findControlWork(controlWorkId);
+        StudentGroupEntity group = findGroup(groupId);
+        validateGroupBelongsToControlWork(controlWork, group);
+
+        StudentGroup studentGroup = domainMapper.toStudentGroup(group);
+        List<StudentEntity> students = studentRepository.findByStudentGroupIdOrderByFullNameAsc(groupId);
+        List<StudentWork> studentWorks = new ArrayList<>();
+        for (StudentEntity student : students) {
+            studentWorks.add(studentWorkService.buildStudentWork(student, controlWork.getPassingScore()));
+        }
+        return new GroupReport(controlWork.getId(), controlWork.getTitle(), studentGroup, controlWork.getPassingScore(), studentWorks);
     }
 
     private ControlWorkEntity findControlWork(Integer controlWorkId) {
@@ -90,5 +113,11 @@ public class CheckingViewService {
             throw new IllegalArgumentException("Студент не найден");
         }
         return student.get();
+    }
+
+    private void validateGroupBelongsToControlWork(ControlWorkEntity controlWork, StudentGroupEntity group) {
+        if (!group.getControlWork().getId().equals(controlWork.getId())) {
+            throw new IllegalArgumentException("Группа не относится к выбранной контрольной работе");
+        }
     }
 }
